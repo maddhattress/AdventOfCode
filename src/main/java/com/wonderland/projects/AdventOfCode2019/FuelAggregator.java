@@ -1,19 +1,19 @@
 package com.wonderland.projects.AdventOfCode2019;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import org.apache.commons.io.IOUtils;
 
 public class FuelAggregator {
 	private int individualFuel = 0; 
 
-	private int run(String filename) {
+	private int run() {
 		int totalFuel = 0;
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new FileReader(filename));
+			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("input/day1.txt")));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				this.calculateFuel(Integer.parseInt(line));
@@ -44,7 +44,7 @@ public class FuelAggregator {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		FuelAggregator ag = new FuelAggregator();
-		int total = ag.run(args[0]);
+		int total = ag.run();
 		System.out.println("Total fuel used: " + total);
 	}
 

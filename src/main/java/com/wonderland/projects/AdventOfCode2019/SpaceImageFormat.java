@@ -1,8 +1,8 @@
 package com.wonderland.projects.AdventOfCode2019;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,10 +13,10 @@ import org.apache.commons.lang.StringUtils;
 
 public class SpaceImageFormat {
 
-	private void run(String filename) {
+	private void run() {
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new FileReader(filename));
+			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("input/day8.txt")));
 			String line;
 			//int[][] layerCounts;
 			while ((line = reader.readLine()) != null) {
@@ -62,7 +62,7 @@ public class SpaceImageFormat {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		SpaceImageFormat ag = new SpaceImageFormat();
-		ag.run(args[0]);
+		ag.run();
 		// System.out.println("Total fuel used: " + total);
 	}
 	
