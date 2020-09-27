@@ -46,10 +46,9 @@ public class IntCode {
 
 	/**
 	 * main processing unit
-	 * @param userInput
 	 * @returns the output for a given instruction
 	 */
-	private int run(int userInput) {
+	private int run() {
 		int index = 0;
 		boolean calculating = true;
 		int retVal = 0;
@@ -92,10 +91,10 @@ public class IntCode {
 				break;
 			case 3:
 				if (paramModeArray[0] == 0) {
-					code[code[index + 1]] = userInput;
+					code[code[index + 1]] = Integer.parseInt(IntCode.getUserInput());
 				}
 				if (paramModeArray[1] == 1) {
-					code[index + 1] = userInput;
+					code[index + 1] = Integer.parseInt(IntCode.getUserInput());
 				}
 				index += 2;
 				break;
@@ -174,8 +173,7 @@ public class IntCode {
 
 	public static void main(String[] args) {
 		IntCode ic = new IntCode();
-		int userInput = Integer.parseInt(IntCode.getUserInput());
-		int output = ic.run(userInput);
+		int output = ic.run();
 		System.out.println("Output: " + output );
 
 	}
