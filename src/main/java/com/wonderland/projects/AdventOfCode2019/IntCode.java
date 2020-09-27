@@ -48,7 +48,7 @@ public class IntCode {
 	 * main processing unit
 	 * @returns the output for a given instruction
 	 */
-	private int run() {
+	public int run() {
 		int index = 0;
 		boolean calculating = true;
 		int retVal = 0;
