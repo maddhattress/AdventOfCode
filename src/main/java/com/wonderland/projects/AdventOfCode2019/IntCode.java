@@ -156,7 +156,6 @@ public class IntCode {
 		//if not empty, pop off next value in array
 		int input = Integer.parseInt(inputs[0]);
 		inputs=(String[]) ArrayUtils.remove(inputs, 0);
-		System.out.println("returning: " + input);
 		return input;
 	}
 	
