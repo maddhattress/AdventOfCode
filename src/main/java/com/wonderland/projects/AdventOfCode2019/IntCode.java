@@ -14,6 +14,7 @@ public class IntCode {
 	
 	/** used to store program instruction/code**/
 	private int[] code;
+	private String[] inputs;
 	BufferedReader reader = null;
 	
 	
@@ -50,6 +51,7 @@ public class IntCode {
 	 */
 	public int run(String[] args) {
 		int index = 0;
+		inputs = args;
 		boolean calculating = true;
 		int retVal = 0;
 
@@ -91,10 +93,10 @@ public class IntCode {
 				break;
 			case 3:
 				if (paramModeArray[0] == 0) {
-					code[code[index + 1]] = IntCode.getInput(args);
+					code[code[index + 1]] = getInput();
 				}
 				if (paramModeArray[1] == 1) {
-					code[index + 1] = IntCode.getInput(args);
+					code[index + 1] = getInput();
 				}
 				index += 2;
 				break;
@@ -146,14 +148,15 @@ public class IntCode {
 	 * @param inputs
 	 * @return
 	 */
-	private static final int getInput(String [] inputs) {
+	private int getInput() {
 		//if empty args, get from user
 		if(ArrayUtils.isEmpty(inputs)) {
 			return Integer.parseInt(IntCode.getUserInput());
 		}
 		//if not empty, pop off next value in array
 		int input = Integer.parseInt(inputs[0]);
-		ArrayUtils.remove(inputs, 0);
+		inputs=(String[]) ArrayUtils.remove(inputs, 0);
+		System.out.println("returning: " + input);
 		return input;
 	}
 	
