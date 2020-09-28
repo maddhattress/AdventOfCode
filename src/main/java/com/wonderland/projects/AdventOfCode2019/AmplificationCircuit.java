@@ -10,9 +10,10 @@ public class AmplificationCircuit {
 	/** List of all the possible phase settings**/
 	private static final List<String> PHASE_SETTINGS = Arrays.asList(new String[] {"0", "1", "2", "3", "4"});
 	
+	
 	/**
 	 * main processing unit
-	 * @return the highest possible signal that can be sent to the trusters
+	 * @return the highest possible signal that can be sent to the thrusters
 	 */
 	private int run() {
 		//iterate thru all the permutations of the phase settings
@@ -28,11 +29,9 @@ public class AmplificationCircuit {
 				//System.out.println("Highest Signal: " + highestSignal);
 				//System.out.println("Best Combo: " + phaseSettingCombo);
 			}
-
 		}
 		return highestSignal;
 	}
-	
 	
 	/**
 	 * calculate the signal for a given phase setting list
@@ -57,8 +56,6 @@ public class AmplificationCircuit {
 		System.out.println("Output: " + thing.run(new String[] {"1","432"}));
 		//System.setIn(new ByteArrayInputStream("4".getBytes()));
 		//IntCode.main(new String[] {"0","4"});
-		
-		
 	}
 	
 	public static void main(String[] args) {
