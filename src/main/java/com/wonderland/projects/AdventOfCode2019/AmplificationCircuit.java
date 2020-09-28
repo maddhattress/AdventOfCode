@@ -44,7 +44,7 @@ public class AmplificationCircuit {
 			IntCode amplifier = new IntCode("input/day7.txt");
 			//IntCode amplifier = new IntCode("input/day7.sample.txt");
 			//set the output to the current run
-			output = amplifier.run(new String[] {ps,Integer.toString(output)});
+			output = amplifier.runProgram(new String[] {ps,Integer.toString(output)});
 		}
 		return output;
 	}
@@ -52,7 +52,7 @@ public class AmplificationCircuit {
 	@SuppressWarnings("unused")
 	private void scratch() {
 		IntCode thing = new IntCode("input/day7.sample.txt");
-		System.out.println("Output: " + thing.run(new String[] {"1","432"}));
+		System.out.println("Output: " + thing.runProgram(new String[] {"1","432"}));
 		//System.setIn(new ByteArrayInputStream("4".getBytes()));
 		//IntCode.main(new String[] {"0","4"});
 	}

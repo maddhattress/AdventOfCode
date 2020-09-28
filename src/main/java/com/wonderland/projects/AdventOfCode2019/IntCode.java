@@ -1,8 +1,12 @@
 package com.wonderland.projects.AdventOfCode2019;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -10,12 +14,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
-public class IntCode {
+public class IntCode extends Thread{
 	
 	/** used to store program instruction/code**/
 	private int[] code;
 	private String[] inputs;
 	BufferedReader reader = null;
+	DataInputStream in = null;
+	DataOutputStream out = null;
 	
 	
 	/**
@@ -30,13 +36,28 @@ public class IntCode {
 	 * load up the program instructions/code based on input filename parameter
 	 * @param filename
 	 */
-	public IntCode(String filename) {
+	public IntCode(String filename){
+		this(filename, null, System.out);
+	}
+	
+	
+	/**
+	 * load up the program instructions/code based on input filename parameter 
+	 * and sets its input and output streams accordingly 
+	 * @param filename
+	 * @param is
+	 * @param os
+	 */
+	public IntCode(String filename, InputStream is, OutputStream os) {
 		try {
 			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				code = ArrayUtils.addAll(code, Arrays.stream(line.split(",")).mapToInt(Integer::parseInt).toArray());
 			}
+			//if input is null keep null, if not set to dataInputStream
+			in = in == null ? null : new DataInputStream(is);
+			out = new DataOutputStream(os);
 		} catch (IOException ex) {
 			System.err.println("ERROR reading file: " + ex.getMessage());
 		} finally {
@@ -49,12 +70,19 @@ public class IntCode {
 	 * main processing unit
 	 * @returns the output for a given instruction
 	 */
-	public int run(String[] args) {
+	public void run() {
+		this.runProgram(null);
+	}
+	
+	/**
+	 * main processing unit
+	 * @returns the output for a given instruction
+	 */
+	public int runProgram(String[] args) {
 		int index = 0;
-		inputs = args;
 		boolean calculating = true;
 		int retVal = 0;
-
+		inputs = args;
 		while (calculating) {
 			int opCode = code[index];
 			// change opcode to String and reverse it
@@ -140,7 +168,6 @@ public class IntCode {
 
 		}
 		return retVal;
-
 	}
 	
 	/**
@@ -149,14 +176,18 @@ public class IntCode {
 	 * @return
 	 */
 	private int getInput() {
-		//if empty args, get from user
-		if(ArrayUtils.isEmpty(inputs)) {
+		if(ArrayUtils.isNotEmpty(inputs)) {
+			//if not empty, pop off next value in array
+			int input = Integer.parseInt(inputs[0]);
+			inputs=(String[]) ArrayUtils.remove(inputs, 0);
+			return input;
+		}else if( in == null) {
+			//if empty args and in is not set, get from user
 			return Integer.parseInt(IntCode.getUserInput());
 		}
-		//if not empty, pop off next value in array
-		int input = Integer.parseInt(inputs[0]);
-		inputs=(String[]) ArrayUtils.remove(inputs, 0);
-		return input;
+		//if none of the above, read from piped input
+		return getPipedInput();
+
 	}
 	
 	/**
@@ -188,10 +219,23 @@ public class IntCode {
 		IOUtils.closeQuietly(scanner);
 		return inputString;
 	}
+	
+	/**
+	 * reads from pipe and handles the IOException
+	 * @return
+	 */
+	private int getPipedInput() {
+		try {
+			return in.readInt();
+		}catch(IOException ioe) {
+			System.err.println("ERROR while getting piped input: "  + ioe.getMessage());
+		}
+		return 0;
+	}
 
 	public static void main(String[] args) {
 		IntCode ic = new IntCode();
-		int output = ic.run(args);
+		int output = ic.runProgram(args);
 		System.out.println("Output: " + output );
 
 	}
