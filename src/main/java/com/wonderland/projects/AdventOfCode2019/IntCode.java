@@ -48,7 +48,7 @@ public class IntCode {
 	 * main processing unit
 	 * @returns the output for a given instruction
 	 */
-	public int run() {
+	public int run(String[] args) {
 		int index = 0;
 		boolean calculating = true;
 		int retVal = 0;
@@ -91,10 +91,10 @@ public class IntCode {
 				break;
 			case 3:
 				if (paramModeArray[0] == 0) {
-					code[code[index + 1]] = Integer.parseInt(IntCode.getUserInput());
+					code[code[index + 1]] = IntCode.getInput(args);
 				}
 				if (paramModeArray[1] == 1) {
-					code[index + 1] = Integer.parseInt(IntCode.getUserInput());
+					code[index + 1] = IntCode.getInput(args);
 				}
 				index += 2;
 				break;
@@ -142,6 +142,22 @@ public class IntCode {
 	}
 	
 	/**
+	 * helper method to determine if args were sent in or if they should be retrieved from user
+	 * @param inputs
+	 * @return
+	 */
+	private static final int getInput(String [] inputs) {
+		//if empty args, get from user
+		if(ArrayUtils.isEmpty(inputs)) {
+			return Integer.parseInt(IntCode.getUserInput());
+		}
+		//if not empty, pop off next value in array
+		int input = Integer.parseInt(inputs[0]);
+		ArrayUtils.remove(inputs, 0);
+		return input;
+	}
+	
+	/**
 	 * given a target and mode define how the param should be used 
 	 * position mode vs immediate mode 
 	 * @param target
@@ -173,7 +189,7 @@ public class IntCode {
 
 	public static void main(String[] args) {
 		IntCode ic = new IntCode();
-		int output = ic.run();
+		int output = ic.run(args);
 		System.out.println("Output: " + output );
 
 	}
