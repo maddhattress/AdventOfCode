@@ -17,23 +17,23 @@ import org.apache.logging.log4j.Logger;
  */
 public class AmplificationCircuit {
 	private final static Logger log = LogManager.getLogger();
-	/** List of all the possible phase settings**/
-	private static final List<String> PHASE_SETTINGS = Arrays.asList(new String[] {"0", "1", "2", "3", "4"});
-	
-	
+	/** List of all the possible phase settings **/
+	private static final List<String> PHASE_SETTINGS = Arrays.asList(new String[] { "0", "1", "2", "3", "4" });
+
 	/**
 	 * main processing unit
+	 * 
 	 * @return the highest possible signal that can be sent to the thrusters
 	 */
 	private int run() {
-		//iterate thru all the permutations of the phase settings
+		// iterate thru all the permutations of the phase settings
 		PermutationIterator<String> iter = new PermutationIterator<String>(PHASE_SETTINGS);
 		int highestSignal = 0;
 		List<String> bestPhaseSettingCombo = new ArrayList<String>();
-		while(iter.hasNext()) {
+		while (iter.hasNext()) {
 			List<String> phaseSettingCombo = iter.next();
 			int signal = calculateSignal(phaseSettingCombo);
-			if(signal > highestSignal) {
+			if (signal > highestSignal) {
 				highestSignal = signal;
 				bestPhaseSettingCombo = phaseSettingCombo;
 			}
@@ -42,25 +42,26 @@ public class AmplificationCircuit {
 		log.info("Best Combo: " + bestPhaseSettingCombo);
 		return highestSignal;
 	}
-	
+
 	/**
 	 * calculate the signal for a given phase setting list
+	 * 
 	 * @param phaseSettings
 	 * @return
 	 */
 	private int calculateSignal(List<String> phaseSettings) {
-		//initialize first amplifiers output to 0 
+		// initialize first amplifiers output to 0
 		int output = 0;
-		for(String ps : phaseSettings) {
+		for (String ps : phaseSettings) {
 			IntCode amplifier = new IntCode("input/day7.txt");
-			//IntCode amplifier = new IntCode("input/day7.sample.txt");
-			//set the output to the current run
-			 amplifier.run(new String[] {ps,Integer.toString(output)});
-			 output = amplifier.getOutputSignal();
+			// IntCode amplifier = new IntCode("input/day7.sample.txt");
+			// set the output to the current run
+			amplifier.setArgs(new String[] { ps, Integer.toString(output) });
+			amplifier.run();
+			output = amplifier.getOutputSignal();
 		}
 		return output;
 	}
-
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

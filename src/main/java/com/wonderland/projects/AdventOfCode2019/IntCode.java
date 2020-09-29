@@ -26,6 +26,7 @@ public class IntCode extends Thread {
 	PipedInputStream in = null;
 	// DataOutputStream out = null;
 	PipedOutputStream out = null;
+	String args[];
 
 	private int outputSignal = 0;
 
@@ -80,7 +81,7 @@ public class IntCode extends Thread {
 	 * 
 	 * @returns the output for a given instruction
 	 */
-	public synchronized void run(String[] args) {
+	public synchronized void run() {
 		log.debug("Running program[" + this.hashCode() + "]:" + Thread.currentThread().getName());
 		int index = 0;
 		boolean calculating = true;
@@ -303,10 +304,14 @@ public class IntCode extends Thread {
 	public void setOutputSignal(int outputSignal) {
 		this.outputSignal = outputSignal;
 	}
+	
+	public void setArgs(String args[]) {
+		this.args = args;
+	}
 
 	public static void main(String[] args) {
 		IntCode ic = new IntCode();
-		ic.run(args);
+		ic.run();
 		System.out.println("Output: " + ic.getOutputSignal());
 
 	}
