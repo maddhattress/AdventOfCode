@@ -3,21 +3,32 @@ package com.wonderland.projects.AdventOfCode2019;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.Scanner;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class IntCode {
-	
-	/** used to store program instruction/code**/
+public class IntCode extends Thread {
+
+	private final static Logger log = LogManager.getLogger();
+
+	/** used to store program instruction/code **/
 	private int[] code;
 	private String[] inputs;
 	BufferedReader reader = null;
-	
-	
+	// DataInputStream in = null;
+	PipedInputStream in = null;
+	// DataOutputStream out = null;
+	PipedOutputStream out = null;
+
+	private int outputSignal = 0;
+
 	/**
 	 * hardcode to day5 input if none provided
 	 */
@@ -25,36 +36,56 @@ public class IntCode {
 		this("input/day5.txt");
 
 	}
-	
+
 	/**
 	 * load up the program instructions/code based on input filename parameter
+	 * 
 	 * @param filename
 	 */
 	public IntCode(String filename) {
 		try {
-			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)));
+			reader = new BufferedReader(
+					new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				code = ArrayUtils.addAll(code, Arrays.stream(line.split(",")).mapToInt(Integer::parseInt).toArray());
 			}
-		} catch (IOException ex) {
-			System.err.println("ERROR reading file: " + ex.getMessage());
+
+		} catch (IOException ioe) {
+			log.error("IOException while reading program instruction file.", ioe);
 		} finally {
 			IOUtils.closeQuietly(reader);
 		}
+	}
 
+	/**
+	 * setting up pipedinput and output streams to daisy chain versus getting user
+	 * input
+	 * 
+	 * @param is
+	 * @param os
+	 * @param phaseSetting
+	 * @param startVal     only set for amp A, otherwise null
+	 */
+	public void initializeStreams(PipedInputStream is, PipedOutputStream os, String phaseSetting, String startVal) {
+		// if input is null keep null, if not set to dataInputStream
+		in = is;
+		out = os;
+		this.write(phaseSetting);
+		this.write(startVal);
 	}
 
 	/**
 	 * main processing unit
+	 * 
 	 * @returns the output for a given instruction
 	 */
-	public int run(String[] args) {
+	public synchronized void run(String[] args) {
+		log.debug("Running program[" + this.hashCode() + "]:" + Thread.currentThread().getName());
 		int index = 0;
-		inputs = args;
 		boolean calculating = true;
 		int retVal = 0;
-
+		inputs = args;
 		while (calculating) {
 			int opCode = code[index];
 			// change opcode to String and reverse it
@@ -73,11 +104,11 @@ public class IntCode {
 				}
 			}
 
-			
-			//instructions on how to operate based on opcode
+			// instructions on how to operate based on opcode
 			switch (opCode) {
 			case 99:
 				calculating = false;
+				this.shutdown();
 				break;
 			case 1:
 				int sum = determineParam(code[index + 1], paramModeArray[0])
@@ -102,6 +133,8 @@ public class IntCode {
 				break;
 			case 4:
 				retVal = determineParam(code[index + 1], paramModeArray[0]);
+				this.write(Integer.toString(retVal));
+				this.setOutputSignal(retVal);
 				index += 2;
 				break;
 			case 5:
@@ -139,37 +172,42 @@ public class IntCode {
 			}
 
 		}
-		return retVal;
-
 	}
-	
+
 	/**
-	 * helper method to determine if args were sent in or if they should be retrieved from user
+	 * helper method to determine if args were sent in or if they should be
+	 * retrieved from user
+	 * 
 	 * @param inputs
 	 * @return
 	 */
-	private int getInput() {
-		//if empty args, get from user
-		if(ArrayUtils.isEmpty(inputs)) {
+	private synchronized int getInput() {
+		if (ArrayUtils.isNotEmpty(inputs)) {
+			// if not empty, pop off next value in array
+			int input = Integer.parseInt(inputs[0]);
+			inputs = (String[]) ArrayUtils.remove(inputs, 0);
+			return input;
+		} else if (in == null) {
+			// if empty args and in is not set, get from user
 			return Integer.parseInt(IntCode.getUserInput());
 		}
-		//if not empty, pop off next value in array
-		int input = Integer.parseInt(inputs[0]);
-		inputs=(String[]) ArrayUtils.remove(inputs, 0);
-		return input;
+		// if none of the above, read from piped input
+		return getPipedInput();
+
 	}
-	
+
 	/**
-	 * given a target and mode define how the param should be used 
-	 * position mode vs immediate mode 
+	 * given a target and mode define how the param should be used position mode vs
+	 * immediate mode
+	 * 
 	 * @param target
 	 * @param mode
 	 * @return
 	 */
-	private int determineParam(int target, int mode) {
-		if (mode == 0) { 		//position mode
+	private synchronized int determineParam(int target, int mode) {
+		if (mode == 0) { // position mode
 			return code[target];
-		} else if (mode == 1) { //immediate mode
+		} else if (mode == 1) { // immediate mode
 			return target;
 		} else {
 			return -1;
@@ -178,6 +216,7 @@ public class IntCode {
 
 	/**
 	 * retrieve stdin from user
+	 * 
 	 * @return
 	 */
 	public static final String getUserInput() {
@@ -189,10 +228,86 @@ public class IntCode {
 		return inputString;
 	}
 
+	/**
+	 * reads from pipe and handles the IOException
+	 * 
+	 * @return
+	 */
+	private synchronized int getPipedInput() {
+		try {
+			int input = Integer.parseInt(readLine(in));
+			log.debug("[" + in.hashCode() + "]: Read input=" + input);
+			return input;
+		} catch (IOException ioe) {
+			log.error("IOException while reading piped input.", ioe);
+		}
+		return 0;
+	}
+
+	/**
+	 * helper method to read line by line from PipedInputStream
+	 * 
+	 * @param in
+	 * @return
+	 * @throws IOException
+	 */
+	public synchronized String readLine(PipedInputStream in) throws IOException {
+		String input = "";
+		do {
+			while (in.available() == 0) {
+				try {
+					log.debug("Sleeping for 10ms");
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					log.error("InterruptedException while reading from pipedInputStream.", e);
+				}
+			}
+			char c = (char) in.read();
+			input = input + c;
+		} while (!input.endsWith(System.lineSeparator()));
+		return input.replace(System.lineSeparator(), "");
+	}
+
+	/**
+	 * helper method to write to pipedOutputstream
+	 * 
+	 * @param val
+	 */
+	private synchronized void write(String val) {
+		try {
+			if (val != null && out != null) {
+				log.debug("[" + out.hashCode() + "]: Writing: " + val);
+				val = val + System.lineSeparator();
+				out.write(val.getBytes());
+			}
+		} catch (IOException ioe) {
+			// ignore if pipe is closed
+			if (!ioe.getMessage().contains("Pipe closed")) {
+				log.error("IOException when writing out.", ioe);
+			}
+		}
+	}
+
+	/**
+	 * helper method to close input and output streams
+	 */
+	public void shutdown() {
+		IOUtils.closeQuietly(in);
+		IOUtils.closeQuietly(out);
+	}
+
+	public int getOutputSignal() {
+		return outputSignal;
+	}
+
+	public void setOutputSignal(int outputSignal) {
+		this.outputSignal = outputSignal;
+	}
+
 	public static void main(String[] args) {
 		IntCode ic = new IntCode();
-		int output = ic.run(args);
-		System.out.println("Output: " + output );
+		ic.run(args);
+		System.out.println("Output: " + ic.getOutputSignal());
 
 	}
 
