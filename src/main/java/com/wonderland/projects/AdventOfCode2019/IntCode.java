@@ -255,6 +255,7 @@ public class IntCode extends Thread {
 	public synchronized String readLine(PipedInputStream in) throws IOException {
 		String input = "";
 		do {
+			//forcing to check availabilitiy because its faster
 			while (in.available() == 0) {
 				try {
 					log.debug("Sleeping for 10ms");
