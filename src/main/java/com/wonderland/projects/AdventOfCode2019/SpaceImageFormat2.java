@@ -7,21 +7,34 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+/**
+ * @author Jenn Dell
+ * @see <a
+ *      href="Advent of Code 2019, Day 8">https://adventofcode.com/2019/day/8#part2</a>
+ *
+ */
 public class SpaceImageFormat2 {
-
+	private static final Logger log = LogManager.getLogger();
+	private static final String INPUT = "input/day8.txt";
+	
+	/**
+	 * main processing unit
+	 */
 	private void run() {
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("input/day8.txt")));
+			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(INPUT)));
 			String line;
 			while ((line = reader.readLine()) != null) {
 				String linesList = line.replaceAll("(.{150})", "$1\n");
 				List<String> layers = Arrays.asList(linesList.split("\n"));
 				String finalImage = layers.get(8);
 				for (String layer : layers) {
-					//System.out.println("F:" + finalImage);
-					//System.out.println("N:" + layer);
+					log.debug("F:" + finalImage);
+					log.debug("N:" + layer);
 					String tempImage = "";
 					for (int i = 0; i < 150; i++) {
 						if(finalImage.charAt(i) == '2' && layer.charAt(i) != '2') {
@@ -30,23 +43,26 @@ public class SpaceImageFormat2 {
 							tempImage+=finalImage.charAt(i);
 						}
 					}
-					//this.printImage(finalImage);
 
 					finalImage = tempImage;
-					//System.out.println("X:" + finalImage);
-					//System.out.println("______________________________________________");
+					log.debug("X:" + finalImage);
+					log.debug("______________________________________________");
 
 
 				}
 				this.printImage(finalImage);
 			}
 		} catch (IOException ex) {
-			System.err.println("ERROR reading file: " + ex.getMessage());
+			log.error("IOException reading input file " + INPUT, ex);
 		} finally {
 			IOUtils.closeQuietly(reader);
 		}
 	}
 	
+	/**
+	 * prints out the image
+	 * @param image
+	 */
 	private void printImage(String image) {
 		String linesList = image.replaceAll("(.{25})", "$1\n");
 		List<String> rows = Arrays.asList(linesList.split("\n"));
@@ -54,17 +70,15 @@ public class SpaceImageFormat2 {
 			//row = row.replaceAll("1", "X");
 			row = row.replaceAll("0", " ");
 			row = row.replaceAll("2", " ");
-			System.out.println(row);
+			log.info(row);
 		}
 
 
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		SpaceImageFormat2 ag = new SpaceImageFormat2();
 		ag.run();
-		// System.out.println("Total fuel used: " + total);
 	}
 
 }

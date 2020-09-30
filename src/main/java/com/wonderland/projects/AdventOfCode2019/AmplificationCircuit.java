@@ -16,7 +16,10 @@ import org.apache.logging.log4j.Logger;
  *
  */
 public class AmplificationCircuit {
-	private final static Logger log = LogManager.getLogger();
+	private static final Logger log = LogManager.getLogger();
+	private static final String INPUT = "input/day7.txt";
+	//private static final String INPUT = "input/day7.sample.txt";
+	
 	/** List of all the possible phase settings **/
 	private static final List<String> PHASE_SETTINGS = Arrays.asList(new String[] { "0", "1", "2", "3", "4" });
 
@@ -53,8 +56,8 @@ public class AmplificationCircuit {
 		// initialize first amplifiers output to 0
 		int output = 0;
 		for (String ps : phaseSettings) {
-			IntCode amplifier = new IntCode("input/day7.txt");
-			// IntCode amplifier = new IntCode("input/day7.sample.txt");
+			IntCode amplifier = new IntCode(INPUT);
+
 			// set the output to the current run
 			amplifier.setArgs(new String[] { ps, Integer.toString(output) });
 			amplifier.run();

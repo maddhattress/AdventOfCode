@@ -10,23 +10,31 @@ import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+/**
+ * @author Jenn Dell
+ * @see <a
+ *      href="Advent of Code 2019, Day 8">https://adventofcode.com/2019/day/8</a>
+ *
+ */
 public class SpaceImageFormat {
-
+	private static final Logger log = LogManager.getLogger();
+	private static final String INPUT = "input/day8.txt";
+	
+	/**
+	 * main processing unit
+	 */
 	private void run() {
 		BufferedReader reader = null;
 		try {
-			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("input/day8.txt")));
+			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(INPUT)));
 			String line;
-			//int[][] layerCounts;
 			while ((line = reader.readLine()) != null) {
 				String linesList   = line.replaceAll("(.{150})", "$1\n");
 				List<String> layers = Arrays.asList(linesList.split("\n"));
-				//for(int i = 0; i< 150; i++)
-				//{
-				//	if layer.codePointAt(i) == 0
-						
-				//}
+
 				Map<Integer, LayerCounter> counters = new HashMap<Integer, LayerCounter>();
 				int smallestZeroLayer = 999;
 				int smallestLayer = 0;
@@ -45,27 +53,25 @@ public class SpaceImageFormat {
 				}
 				
 				LayerCounter smallestCounter = counters.get(smallestLayer);
-				System.out.println(smallestCounter.getOnesCount() * smallestCounter.getTwosCount());
- 				//for(Entry<Integer, LayerCounter>)
-			//	for(String layer : layers) {
-				//	System.out.println("Layer: " + layer);
-				//}
-				// mod 6 == 0 layer ++
+				log.debug(smallestCounter.getOnesCount() * smallestCounter.getTwosCount());
+
 			}
 		} catch (IOException ex) {
-			System.err.println("ERROR reading file: " + ex.getMessage());
+			log.error("IOException reading input file " + INPUT, ex);
 		} finally {
 			IOUtils.closeQuietly(reader);
 		}
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		SpaceImageFormat ag = new SpaceImageFormat();
 		ag.run();
-		// System.out.println("Total fuel used: " + total);
 	}
 	
+	/**
+	 * sub helper class for layer counting 
+	 *
+	 */
 	class LayerCounter{
 		private int zeroCount=0;
 		private int onesCount=0;

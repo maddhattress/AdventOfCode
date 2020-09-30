@@ -1,20 +1,33 @@
 package com.wonderland.projects.AdventOfCode2019;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SecureContainer {
-	 private static final int MIN = 136760; //136777
-	//private static final int MIN = 155555;//153517; // 155555
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-	 private static final int MAX = 595730; //589999
-	//private static final int MAX = 599999; //630395;
+/**
+ * @author Jenn Dell
+ * @see <a
+ *      href="Advent of Code 2019, Day 4">https://adventofcode.com/2019/day/4</a>
+ *
+ */
+public class SecureContainer {
+	private static final Logger log = LogManager.getLogger();
+	private static final String INPUT = "input/day4.txt";
+	
+	private int MIN;
+	private int MAX; 
+
 
 	private static final int PASSWORD_LENGTH = 6;
 	// input: 136760-595730
-
 	// 6 digit number
 	// within range
 	// two adjacent digits
@@ -22,6 +35,25 @@ public class SecureContainer {
 
 	// valid input: 136,777 - 589,999
 
+	/**
+	 * read input file and set min/max values. 
+	 */
+	public SecureContainer() {
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(INPUT)));
+			String line = reader.readLine();
+			MIN = Integer.parseInt(StringUtils.substringBefore(line, "-"));
+			MAX = Integer.parseInt(StringUtils.substringAfter(line, "-"));
+		} catch (IOException ioe) {
+			log.error("IOException while reading iput file " + INPUT, ioe);
+		}
+	}
+	
+	/**
+	 * calculate all the possible values for the password
+	 * @return
+	 */
 	private int calculatePossiblePasswords() {
 		int val = MIN;
 		int counter = 0;
@@ -38,16 +70,20 @@ public class SecureContainer {
 			}
 			val = Integer.parseInt(new String(charVal));
 			if (this.checkDuplicates(charVal) && val <= MAX && this.checkStrictDuplicates(charVal)) {
-				System.out.println(val);
+				log.debug("Valid possible value: " + val);
 				possibilities.add(val);
 				counter++;
 			}
 			val++;
 		}
-		// return possibilities.size();
 		return counter;
 	}
 
+	/**
+	 * check to see if there exists a duplicate
+	 * @param charVal
+	 * @return
+	 */
 	public boolean checkDuplicates(char[] charVal) {
 		for (int c = 1; c < PASSWORD_LENGTH; c++) {
 			if (charVal[c] == charVal[c - 1]) {
@@ -57,6 +93,11 @@ public class SecureContainer {
 		return false;
 	}
 
+	/**
+	 * check to see if there is at least 1 duplicate and note a triple
+	 * @param charVal
+	 * @return
+	 */
 	public boolean checkStrictDuplicates(char[] charVal) {
 		Map<Integer, Integer> frequency = new HashMap<Integer, Integer>();
 		for (int c = 1; c < PASSWORD_LENGTH; c++) {
@@ -78,7 +119,7 @@ public class SecureContainer {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		SecureContainer sc = new SecureContainer();
-		System.out.println("Total Passwords Possible: " + sc.calculatePossiblePasswords());
+		log.info("Total Passwords Possible: " + sc.calculatePossiblePasswords());
 
 	}
 

@@ -16,15 +16,14 @@ import org.apache.logging.log4j.Logger;
 
 public class IntCode extends Thread {
 
-	private final static Logger log = LogManager.getLogger();
-
+	private static final Logger log = LogManager.getLogger();
+	private static final String INPUT = "input/day5.txt"; 
+	
 	/** used to store program instruction/code **/
 	private int[] code;
 	private String[] inputs;
 	BufferedReader reader = null;
-	// DataInputStream in = null;
 	PipedInputStream in = null;
-	// DataOutputStream out = null;
 	PipedOutputStream out = null;
 	String args[];
 
@@ -34,7 +33,7 @@ public class IntCode extends Thread {
 	 * hardcode to day5 input if none provided
 	 */
 	public IntCode() {
-		this("input/day5.txt");
+		this(INPUT);
 
 	}
 
@@ -255,7 +254,7 @@ public class IntCode extends Thread {
 	public synchronized String readLine(PipedInputStream in) throws IOException {
 		String input = "";
 		do {
-			//forcing to check availabilitiy because its faster
+			//forcing to check availability because its faster
 			while (in.available() == 0) {
 				try {
 					log.debug("Sleeping for 10ms");

@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
  *
  */
 public class AmplificationCircuit2 {
-	private final static Logger log = LogManager.getLogger();
+	private static final Logger log = LogManager.getLogger();
 	/** List of all the possible phase settings **/
 	private static final List<String> PHASE_SETTINGS = Arrays.asList(new String[] { "5", "6", "7", "8", "9" });
 
