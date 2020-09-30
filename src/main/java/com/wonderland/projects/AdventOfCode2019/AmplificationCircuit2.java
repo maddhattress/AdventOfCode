@@ -6,6 +6,9 @@ import java.io.PipedOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections4.iterators.PermutationIterator;
 import org.apache.logging.log4j.LogManager;
@@ -55,37 +58,30 @@ public class AmplificationCircuit2 {
 	 * @return
 	 */
 	private int calculateSignal(List<String> phaseSettings) {
-		// initialize first amplifiers output to 0
-		int output = 0;
-		IntCode a = new IntCode(INPUT_PROGRAM);
-		IntCode b = new IntCode(INPUT_PROGRAM);
-		IntCode c = new IntCode(INPUT_PROGRAM);
-		IntCode d = new IntCode(INPUT_PROGRAM);
-		IntCode e = new IntCode(INPUT_PROGRAM);
+//
+//		Amplifier ampA = new Amplifier(new IntCode(INPUT_PROGRAM), "ampA");
+//		Amplifier ampB = new Amplifier(new IntCode(INPUT_PROGRAM), "ampB");
+//		Amplifier ampC = new Amplifier(new IntCode(INPUT_PROGRAM), "ampC");
+//		Amplifier ampD = new Amplifier(new IntCode(INPUT_PROGRAM), "ampD");
+//		Amplifier ampE = new Amplifier(new IntCode(INPUT_PROGRAM), "ampE");
+//
+//		log.debug("connecting B[" + ampB.hashCode() + "] input to output of A[" + ampA.hashCode() + "]");
+//		ampB.connect(ampA.getPout());
+//		log.debug("connecting C[" + ampC.hashCode() + "] input to output of B[" + ampB.hashCode() + "]");
+//		ampC.connect(ampB.getPout());
+//		log.debug("connecting D[" + ampD.hashCode() + "] input to output of C[" + ampC.hashCode() + "]");
+//		ampD.connect(ampC.getPout());
+//		log.debug("connecting E[" + ampE.hashCode() + "] input to output of D[" + ampD.hashCode() + "]");
+//		ampE.connect(ampD.getPout());
+//		log.debug("connecting A[" + ampA.hashCode() + "] input to output of E[" + ampE.hashCode() + "]");
+//		ampA.connect(ampE.getPout());
+//
+//		// add amplifiers to list
+//		List<Amplifier> amplifiers = Arrays.asList(new Amplifier[] { ampA, ampB, ampC, ampD, ampE });
 
-		Amplifier ampA = new Amplifier(a, "ampA");
-		Amplifier ampB = new Amplifier(b, "ampB");
-		Amplifier ampC = new Amplifier(c, "ampC");
-		Amplifier ampD = new Amplifier(d, "ampD");
-		Amplifier ampE = new Amplifier(e, "ampE");
-
-		log.debug("connecting B[" + ampB.hashCode() + "] input to output of A[" + ampA.hashCode() + "]");
-		ampB.connect(ampA.getPout());
-		log.debug("connecting C[" + ampC.hashCode() + "] input to output of B[" + ampB.hashCode() + "]");
-		ampC.connect(ampB.getPout());
-		log.debug("connecting D[" + ampD.hashCode() + "] input to output of C[" + ampC.hashCode() + "]");
-		ampD.connect(ampC.getPout());
-		log.debug("connecting E[" + ampE.hashCode() + "] input to output of D[" + ampD.hashCode() + "]");
-		ampE.connect(ampD.getPout());
-		log.debug("connecting A[" + ampA.hashCode() + "] input to output of E[" + ampE.hashCode() + "]");
-		ampA.connect(ampE.getPout());
-
-		List<Amplifier> amplifiers = new ArrayList<Amplifier>();
-		amplifiers.add(ampA);
-		amplifiers.add(ampB);
-		amplifiers.add(ampC);
-		amplifiers.add(ampD);
-		amplifiers.add(ampE);
+		// Below command does what above 20 lines had
+		List<Amplifier> amplifiers = Stream.generate(new AmplifierGenerator()).limit(5).collect(Collectors.toList());
+		amplifiers.get(0).connect(amplifiers.get(amplifiers.size() - 1));
 
 		log.debug("Phase Settings: " + phaseSettings);
 
@@ -99,22 +95,28 @@ public class AmplificationCircuit2 {
 			ampIndex += 1;
 		}
 
-		for (Amplifier amp : amplifiers) {
-			IntCode ic = amp.getIntCode();
-			ic.start();
-		}
-		for (Amplifier amp : amplifiers) {
-			IntCode ic = amp.getIntCode();
-			try {
-				ic.join();
-			} catch (Exception ex) {
-				System.out.println("Interrupted");
-			}
-			output = ic.getOutputSignal();
+		// start each thread
+		amplifiers.forEach(amp -> amp.startProgram());
+		// join each thread
+		amplifiers.forEach(amp -> amp.joinProgram());
+		// return value from last amplifier
+		return amplifiers.get(amplifiers.size() - 1).getOutput();
+	}
 
+	private class AmplifierGenerator implements Supplier<Amplifier> {
+		private Amplifier connectedAmp = null;
+		private char counter = 'A';
+
+		@Override
+		public Amplifier get() {
+			Amplifier amp = new Amplifier(new IntCode(INPUT_PROGRAM), "amp" + counter);
+			if (connectedAmp != null) {
+				amp.connect(connectedAmp);
+			}
+			connectedAmp = amp;
+			counter++;
+			return amp;
 		}
-		// log.info("Output: " + output);
-		return output;
 	}
 
 	private class Amplifier {
@@ -122,25 +124,40 @@ public class AmplificationCircuit2 {
 		private PipedInputStream pin;
 		private PipedOutputStream pout;
 		private String name;
+		private int output = 0;
 
 		public Amplifier(IntCode intCode, String name) {
 			this.intCode = intCode;
 			this.name = name;
 			pin = new PipedInputStream();
 			pout = new PipedOutputStream();
-			log.debug("Creating amplifier[" + this.name + "] with intCode[" + this.intCode.hashCode()
-					+ "], PipedInputStream[" + this.pin.hashCode() + "], PipedOutputStream[" + this.pout.hashCode()
-					+ "]");
+			log.debug("Creating " + this.toString() + " with PipedInputStream[" + this.pin.hashCode()
+					+ "], PipedOutputStream[" + this.pout.hashCode() + "]");
 		}
 
-		public void connect(PipedOutputStream pos) {
+		private void connect(Amplifier connectedAmp) {
+			log.debug("Connecting " + this.toString() + " input to output of " + connectedAmp.toString());
+
 			try {
-				log.debug("Connecting PipedOuputStream[" + pos.hashCode() + "]");
-				pin.connect(pos);
+				log.debug("Connecting PipedOuputStream[" +connectedAmp.getPout().hashCode() + "]");
+				pin.connect(connectedAmp.getPout());
 			} catch (IOException ioe) {
-				log.error("IOException while connecting outputstream to amp: " + this.name + ".", ioe);
+				log.error("IOException while connecting outputstream to amp: " + this.toString() + ".", ioe);
 				// ioe.printStackTrace();
 			}
+		}
+
+		public void startProgram() {
+			this.intCode.start();
+		}
+
+		public void joinProgram() {
+			try {
+				intCode.join();
+			} catch (InterruptedException ex) {
+				log.error("InterruptedException while joining thread.", ex);
+			}
+			output = intCode.getOutputSignal();
 		}
 
 		public IntCode getIntCode() {
@@ -157,6 +174,15 @@ public class AmplificationCircuit2 {
 
 		public String getName() {
 			return name;
+		}
+
+		public int getOutput() {
+			return output;
+		}
+
+		@Override
+		public String toString() {
+			return "Amplifier " + name + "[" + intCode.hashCode() + "]";
 		}
 
 	}
