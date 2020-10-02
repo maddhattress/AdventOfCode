@@ -158,13 +158,15 @@ public class SensorBoostIntCode extends Thread {
 				// value and store it at address 50.
 				log.debug("Getting user input...");
 				long input = getInput();
-				code.put(new Long(determineParam(code.get(index+1), paramModeArray[0])).intValue(), input);
-//				if (paramModeArray[0] ==0 ) {
-//					code.put(code.get(index + 1).intValue(), getInput());
-//				}
-//				if (paramModeArray[0] == 1) {
-//					code.put(index + 1, getInput());
-//				}
+				if (paramModeArray[0] ==0 ) { //position mode
+					code.put(code.get(index + 1).intValue(), input);
+				}
+				if (paramModeArray[0] == 1) { //immediate mode
+					code.put(index + 1, input);
+				}
+				if (paramModeArray[0] == 2) { //relative mode
+					code.put(new Long(code.get(index + 1) + relativeBase).intValue(), input);
+				}
 				index += 2;
 				break;
 			case 4:
