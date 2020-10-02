@@ -162,7 +162,9 @@ public class SensorBoostIntCode extends Thread {
 					code.put(code.get(index + 1).intValue(), input);
 				}
 				if (paramModeArray[0] == 1) { //immediate mode
-					code.put(index + 1, input);
+					// will never be in immediate mode according to instructions. throw error.
+					log.error("immediate mode specified for OpCode[3], Parameter[" + code.get(index + 1) + "] and Value["
+							+ input + "]");
 				}
 				if (paramModeArray[0] == 2) { //relative mode
 					code.put(new Long(code.get(index + 1) + relativeBase).intValue(), input);
