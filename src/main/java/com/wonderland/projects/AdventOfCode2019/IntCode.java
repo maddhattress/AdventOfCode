@@ -126,7 +126,7 @@ public class IntCode extends Thread {
 				if (paramModeArray[0] == 0) {
 					code[code[index + 1]] = getInput();
 				}
-				if (paramModeArray[1] == 1) {
+				if (paramModeArray[0] == 1) {
 					code[index + 1] = getInput();
 				}
 				index += 2;
