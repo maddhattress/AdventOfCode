@@ -27,8 +27,8 @@ import org.apache.logging.log4j.Logger;
 public class SensorBoostIntCode extends Thread {
 
 	private static final Logger log = LogManager.getLogger();
-	private static final String INPUT = "input/day9.txt";
-	//private static final String INPUT = "input/day9.sample.txt";
+	//private static final String INPUT = "input/day9.txt";
+	private static final String INPUT = "input/day9.sample.txt";
 
 	/** used to store program instruction/code **/
 	private Map<Integer, Long> code;
@@ -175,7 +175,7 @@ public class SensorBoostIntCode extends Thread {
 				// Opcode 4 outputs the value of its only parameter. For example, the
 				// instruction 4,50 would output the value at address 50.
 				retVal = determineParam(code.get(index + 1), paramModeArray[0]);
-				log.info("Doing something with 4: " + retVal);
+				log.info("Outputting in opCode 4: " + retVal);
 				this.write(Long.toString(retVal));
 				this.setOutputSignal(retVal);
 				index += 2;
@@ -274,11 +274,11 @@ public class SensorBoostIntCode extends Thread {
 		int mode = new Long(m).intValue();
 		log.debug("Target: " + target + " Mode: " + mode);
 		if (mode == 0) { // position mode
-			return code.get(target);
+			return code.get(checkNonNegative(target));
 		} else if (mode == 1) { // immediate mode
-			return target;
+			return t; //t is the long value for target
 		} else if (mode == 2) { // relative mode
-			return code.get((int)relativeBase + target);
+			return code.get(checkNonNegative((int)relativeBase + target));
 		} else {
 			return -1;
 		}
@@ -291,13 +291,13 @@ public class SensorBoostIntCode extends Thread {
 	 * @param val
 	 * @return
 	 */
-//	private static final int checkNonNegative(long val) {
-//		if (val < 0) {
-//			log.error("Error trying to access value [" + val + "]. Address should be positive");
-//			System.exit(9);
-//		}
-//		return (int) val;
-//	}
+	private static final int checkNonNegative(long val) {
+		if (val < 0) {
+			log.error("Error trying to access value [" + val + "]. Address should be positive");
+			System.exit(9);
+		}
+		return (int) val;
+	}
 
 	/**
 	 * retrieve stdin from user
