@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,11 +26,11 @@ import org.apache.logging.log4j.Logger;
 public class SensorBoostIntCode extends Thread {
 
 	private static final Logger log = LogManager.getLogger();
-	//private static final String INPUT = "input/day9.txt";
-	private static final String INPUT = "input/day9.sample.txt";
+	private static final String INPUT = "input/day9.txt";
+	//private static final String INPUT = "input/day9.sample.txt";
 
 	/** used to store program instruction/code **/
-	private Map<Integer, Long> code;
+	private IntCodeProgram<Integer, Long> code;
 
 	private int index = 0;
 	private String[] inputs;
@@ -63,8 +62,11 @@ public class SensorBoostIntCode extends Thread {
 					new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)));
 			String line;
 			while ((line = reader.readLine()) != null) {
-				final long[] c = ArrayUtils.addAll(new long[0],	Arrays.stream(line.split(",")).mapToLong(Long::parseLong).toArray());
-				code = IntStream.range(0, c.length).boxed().collect(Collectors.toMap(Function.identity(), k -> c[k]));
+				final long[] c = ArrayUtils.addAll(new long[0],	Arrays.stream(line.split(","))
+						.mapToLong(Long::parseLong).toArray());
+				code = IntStream.range(0, c.length)
+						.boxed()
+						.collect(Collectors.toMap(Function.identity(), k->c[k], (a,b)->a,() -> new IntCodeProgram<Integer,Long>(0L)));
 			}
 
 		} catch (IOException ioe) {
@@ -74,6 +76,7 @@ public class SensorBoostIntCode extends Thread {
 		}
 	}
 
+	
 	/**
 	 * setting up pipedinput and output streams to daisy chain versus getting user
 	 * input
@@ -113,14 +116,14 @@ public class SensorBoostIntCode extends Thread {
 
 			// figure out if its more than 2 digits long, if so use parameter mode
 			if (oplex.length > 2) {
-				log.debug("Parameter mode initiated for " + opCode);
+				//log.debug("Parameter mode initiated for " + opCode);
 				opCode = (oplex[1] * 10) + oplex[0];
 				int pIndex = 0;
 				for (int i = 2; i < oplex.length; i++) {
 					paramModeArray[pIndex] = (int) oplex[i];
 					pIndex += 1;
 				}
-				log.debug("Parameters: " + Arrays.toString(paramModeArray));
+				//log.debug("Parameters: " + Arrays.toString(paramModeArray));
 			}
 			// instructions on how to operate based on opcode
 			log.debug("Processing Opcode: " + opCode);
@@ -185,8 +188,10 @@ public class SensorBoostIntCode extends Thread {
 				// instruction pointer to the value from the second parameter.
 				if (determineParam(code.get(index + 1), paramModeArray[0]) != 0) {
 					index = (int) determineParam(code.get(index + 2), paramModeArray[1]);
+					log.debug("Updating index: " + index);
 
 				} else {
+					log.debug("No Op for OpCode 5");
 					index += 3;
 				}
 				break;
@@ -196,8 +201,10 @@ public class SensorBoostIntCode extends Thread {
 				// does nothing.
 				if (determineParam(code.get(index + 1), paramModeArray[0]) == 0) {
 					index = (int) determineParam(code.get(index + 2), paramModeArray[1]);
+					log.debug("Updating index: " + index);
 
 				} else {
+					log.debug("No Op for OpCode 6");
 					index += 3;
 				}
 				break;
@@ -272,7 +279,7 @@ public class SensorBoostIntCode extends Thread {
 	private long determineParam(long t, long m) {
 		int target = new Long(t).intValue();
 		int mode = new Long(m).intValue();
-		log.debug("Target: " + target + " Mode: " + mode);
+		log.debug("Parameter -- Target: " + target + " Mode: " + mode);
 		if (mode == 0) { // position mode
 			return code.get(checkNonNegative(target));
 		} else if (mode == 1) { // immediate mode
