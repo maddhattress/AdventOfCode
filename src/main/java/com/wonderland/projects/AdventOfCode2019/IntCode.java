@@ -123,11 +123,14 @@ public class IntCode extends Thread {
 				index += 4;
 				break;
 			case 3:
+				int input = getInput();
 				if (paramModeArray[0] == 0) {
-					code[code[index + 1]] = getInput();
+					code[code[index + 1]] = input;
 				}
-				if (paramModeArray[1] == 1) {
-					code[index + 1] = getInput();
+				if (paramModeArray[0] == 1) {
+					// will never be in immediate mode according to instructions. throw error.
+					log.error("immediate mode specified for OpCode[3], Parameter[" + code[index + 1] + "] and Value["
+							+ input + "]");
 				}
 				index += 2;
 				break;
