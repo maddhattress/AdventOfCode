@@ -76,7 +76,6 @@ public class CompleteIntCodeComputer extends Thread {
 			IOUtils.closeQuietly(reader);
 		}
 	}
-
 	
 	/**
 	 * setting up piped input and output streams to daisy chain versus getting user
@@ -108,7 +107,7 @@ public class CompleteIntCodeComputer extends Thread {
 		int opCodeCounter = 0;
 		inputs = args;
 		while (calculating) {
-			//makes it easier to debug
+			// makes it easier to debug
 			log.debug("*****************************************");
 
 			long opCode = code.get(index);
@@ -121,20 +120,18 @@ public class CompleteIntCodeComputer extends Thread {
 		
 			// figure out if its more than 2 digits long, if so use parameter mode
 			if (oplex.length > 2) {
-				//log.debug("Parameter mode initiated for " + opCode);
 				opCode = (oplex[1] * 10) + oplex[0];
 				int pIndex = 0;
 				for (int i = 2; i < oplex.length; i++) {
 					paramModeArray[pIndex] = (int) oplex[i];
 					pIndex += 1;
 				}
-				//log.debug("Parameters: " + Arrays.toString(paramModeArray));
 			}
 
 			// instructions on how to operate based on opcode
 			log.debug("Processing Opcode[" + opCode + "].");
-			int offSet = (paramModeArray[2]==2) ? (int)relativeBase : 0;
-			
+			int offSet = (paramModeArray[2]==2) ? (int) relativeBase : 0;
+
 			if(offSet != 0) {
 				log.debug("Offset: " + offSet);
 			}
@@ -275,11 +272,11 @@ public class CompleteIntCodeComputer extends Thread {
 				index += 2;
 				break;
 			default:
-				//error scenario, bad opcode
+				// error scenario, bad opcode
 				log.error("Bad opCode[" + opCode + "].");
 				System.exit(8);
 			}
-			//makes it easier to debug
+			// makes it easier to debug
 			log.debug("*****************************************");
 		}
 	}
@@ -297,13 +294,13 @@ public class CompleteIntCodeComputer extends Thread {
 		long returnVal = -1;
 		log.debug("Parameter -- Target: " + target + " Mode: " + mode);
 		if (mode == 0) { // position mode
-			 returnVal = code.get(target);
+			returnVal = code.get(target);
 		} else if (mode == 1) { // immediate mode
 			returnVal = t; //t is the long value for target
 		} else if (mode == 2) { // relative mode
-			int newIndex = (int)relativeBase + target;
+			int newIndex = (int) relativeBase + target;
 			log.debug("Getting from index: " + newIndex);
-			returnVal =  code.get(newIndex);
+			returnVal = code.get(newIndex);
 		}
 		log.debug("Return Val: " + returnVal );
 		return returnVal;
