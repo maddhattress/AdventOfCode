@@ -130,8 +130,9 @@ public class CompleteIntCodeComputer extends Thread {
 
 			// instructions on how to operate based on opcode
 			log.debug("Processing Opcode[" + opCode + "].");
+			
+			//handles no write's in immediate mode
 			int offSet = (paramModeArray[2]==2) ? (int) relativeBase : 0;
-
 			if(offSet != 0) {
 				log.debug("Offset: " + offSet);
 			}
@@ -283,7 +284,7 @@ public class CompleteIntCodeComputer extends Thread {
 
 	/**
 	 * given a target and mode define how the param should be used position mode vs
-	 * immediate mode
+	 * immediate mode vs relative mode
 	 * 
 	 * @param target
 	 * @param mode
