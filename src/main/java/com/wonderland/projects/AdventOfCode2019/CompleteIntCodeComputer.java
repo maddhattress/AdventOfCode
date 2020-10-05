@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
  *      href="Advent of Code 2019, Day 9">https://adventofcode.com/2019/day/9</a>
  *
  */
-public class SensorBoostIntCode extends Thread {
+public class CompleteIntCodeComputer extends Thread {
 
 	private static final Logger log = LogManager.getLogger();
 	private static final String INPUT = "input/day9.txt";
@@ -46,7 +46,7 @@ public class SensorBoostIntCode extends Thread {
 	/**
 	 * hardcode to day5 input if none provided
 	 */
-	public SensorBoostIntCode() {
+	public CompleteIntCodeComputer() {
 		this(INPUT);
 
 	}
@@ -56,7 +56,7 @@ public class SensorBoostIntCode extends Thread {
 	 * 
 	 * @param filename
 	 */
-	public SensorBoostIntCode(String filename) {
+	public CompleteIntCodeComputer(String filename) {
 		try {
 			reader = new BufferedReader(
 					new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)));
@@ -325,7 +325,7 @@ public class SensorBoostIntCode extends Thread {
 			return input;
 		} else if (in == null) {
 			// if empty args and in is not set, get from user
-			return Long.parseLong(SensorBoostIntCode.getUserInput());
+			return Long.parseLong(CompleteIntCodeComputer.getUserInput());
 		}
 		// if none of the above, read from piped input
 		return getPipedInput();
@@ -429,7 +429,7 @@ public class SensorBoostIntCode extends Thread {
 	}
 
 	public static void main(String[] args) {
-		SensorBoostIntCode ic = new SensorBoostIntCode();
+		CompleteIntCodeComputer ic = new CompleteIntCodeComputer();
 		ic.run();
 		System.out.println("Output: " + ic.getOutputSignal());
 
