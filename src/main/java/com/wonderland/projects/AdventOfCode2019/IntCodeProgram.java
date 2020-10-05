@@ -5,6 +5,12 @@ import java.util.HashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * @author Jenn Dell
+ * @see <a
+ *      href="Advent of Code 2019, Day 9">https://adventofcode.com/2019</a>
+ *
+ */
 public class IntCodeProgram<K, V> extends HashMap<K, V> {
 	protected V defaultValue;
 	/**
@@ -20,7 +26,7 @@ public class IntCodeProgram<K, V> extends HashMap<K, V> {
 	@Override
 	public V get(Object key) {
 		if ((int) key < 0) {
-			log.error("NegativeKeyException for key: " + key);
+			log.error("NegativeKeyException for key[" + key + "].");
 			// TODO: Make a new for of exception to throw for Negative Numbers
 			throw new NumberFormatException();
 		}

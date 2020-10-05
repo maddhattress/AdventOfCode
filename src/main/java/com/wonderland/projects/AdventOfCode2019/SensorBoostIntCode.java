@@ -62,6 +62,7 @@ public class SensorBoostIntCode extends Thread {
 					new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename)));
 			String line;
 			while ((line = reader.readLine()) != null) {
+				//read string input, assumption is that its all on one line
 				final long[] c = ArrayUtils.addAll(new long[0],	Arrays.stream(line.split(","))
 						.mapToLong(Long::parseLong).toArray());
 				code = IntStream.range(0, c.length)
@@ -78,7 +79,7 @@ public class SensorBoostIntCode extends Thread {
 
 	
 	/**
-	 * setting up pipedinput and output streams to daisy chain versus getting user
+	 * setting up piped input and output streams to daisy chain versus getting user
 	 * input
 	 * 
 	 * @param is
@@ -166,7 +167,7 @@ public class SensorBoostIntCode extends Thread {
 				}
 				if (paramModeArray[0] == 1) { //immediate mode
 					// will never be in immediate mode according to instructions. throw error.
-					log.error("immediate mode specified for OpCode[3], Parameter[" + code.get(index + 1) + "] and Value["
+					log.error("Immediate mode specified for OpCode[3], Parameter[" + code.get(index + 1) + "] and Value["
 							+ input + "]");
 				}
 				if (paramModeArray[0] == 2) { //relative mode
@@ -281,30 +282,16 @@ public class SensorBoostIntCode extends Thread {
 		int mode = new Long(m).intValue();
 		log.debug("Parameter -- Target: " + target + " Mode: " + mode);
 		if (mode == 0) { // position mode
-			return code.get(checkNonNegative(target));
+			return code.get(target);
 		} else if (mode == 1) { // immediate mode
 			return t; //t is the long value for target
 		} else if (mode == 2) { // relative mode
-			return code.get(checkNonNegative((int)relativeBase + target));
+			return code.get((int)relativeBase + target);
 		} else {
 			return -1;
 		}
 	}
 
-	/**
-	 * checks to see if value is not negative. if its negative: produces an error
-	 * and exits program
-	 * 
-	 * @param val
-	 * @return
-	 */
-	private static final int checkNonNegative(long val) {
-		if (val < 0) {
-			log.error("Error trying to access value [" + val + "]. Address should be positive");
-			System.exit(9);
-		}
-		return (int) val;
-	}
 
 	/**
 	 * retrieve stdin from user
