@@ -31,11 +31,11 @@ public class IntCodeProgram<K, V> extends HashMap<K, V> {
 			throw new NumberFormatException();
 		}
 		V value = containsKey(key) ? super.get(key) : defaultValue;
-		log.debug("Getting key[" + key + "]: " + value);
+		//log.debug("Getting key[" + key + "]: " + value);
 
 		return value;
 	}
-
+	
 	@Override
 	public V put(K key, V value) {
 		log.debug("Putting key[" + key + "] with value[" + value + "].");

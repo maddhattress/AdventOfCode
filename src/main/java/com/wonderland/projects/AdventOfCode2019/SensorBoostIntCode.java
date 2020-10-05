@@ -108,13 +108,17 @@ public class SensorBoostIntCode extends Thread {
 		int opCodeCounter = 0;
 		inputs = args;
 		while (calculating) {
+			//makes it easier to debug
+			log.debug("*****************************************");
+
 			long opCode = code.get(index);
 			// change opcode to String and reverse it
 			String opCodeStr = StringUtils.reverse(Long.toString(opCode));
 			// break down each character as separate value 1001 = {1, 0, 0, 1}
 			long[] oplex = Arrays.stream(opCodeStr.split("")).mapToLong(Long::parseLong).toArray();
 			int[] paramModeArray = { 0, 0, 0 };
-
+			
+		
 			// figure out if its more than 2 digits long, if so use parameter mode
 			if (oplex.length > 2) {
 				//log.debug("Parameter mode initiated for " + opCode);
@@ -126,8 +130,15 @@ public class SensorBoostIntCode extends Thread {
 				}
 				//log.debug("Parameters: " + Arrays.toString(paramModeArray));
 			}
+
 			// instructions on how to operate based on opcode
-			log.debug("Processing Opcode: " + opCode);
+			log.debug("Processing Opcode[" + opCode + "].");
+			int offSet = (paramModeArray[2]==2) ? (int)relativeBase : 0;
+			
+			if(offSet != 0) {
+				log.debug("Offset: " + offSet);
+			}
+
 			opCodeCounter++;
 			switch ((int) opCode) {
 			case 99:
@@ -143,18 +154,24 @@ public class SensorBoostIntCode extends Thread {
 				// these three positions - the first two indicate the positions from which you
 				// should read the input values, and the third indicates the position at which
 				// the output should be stored.
-				long sum = determineParam(code.get(index + 1), paramModeArray[0])
-						+ determineParam(code.get(index + 2), paramModeArray[1]);
-				code.put(code.get(index + 3).intValue(), sum);
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 1) + "], Modes: [" + paramModeArray[0] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 2) + "], Modes: [" + paramModeArray[1] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 3) + "], Modes: [" + paramModeArray[2] + "]");
+
+				long sum = get(code.get(index + 1), paramModeArray[0]) + get(code.get(index + 2), paramModeArray[1]);
+				code.put(offSet + code.get(index + 3).intValue(), sum);
 				index += 4;
 				break;
 			case 2:
 				// Opcode 2 works exactly like opcode 1, except it multiplies the two inputs
 				// instead of adding them. Again, the three integers after the opcode indicate
 				// where the inputs and outputs are, not their values.
-				long product = determineParam(code.get(index + 1), paramModeArray[0])
-						* determineParam(code.get(index + 2), paramModeArray[1]);
-				code.put(code.get(index + 3).intValue(), product);
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 1) + "], Modes: [" + paramModeArray[0] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 2) + "], Modes: [" + paramModeArray[1] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 3) + "], Modes: [" + paramModeArray[2] + "]");
+
+				long product = get(code.get(index + 1), paramModeArray[0]) * get(code.get(index + 2), paramModeArray[1]);
+				code.put(offSet + code.get(index + 3).intValue(), product);
 				index += 4;
 				break;
 			case 3:
@@ -179,7 +196,9 @@ public class SensorBoostIntCode extends Thread {
 			case 4:
 				// Opcode 4 outputs the value of its only parameter. For example, the
 				// instruction 4,50 would output the value at address 50.
-				retVal = determineParam(code.get(index + 1), paramModeArray[0]);
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 1) + "], Modes: [" + paramModeArray[0] + "]");
+
+				retVal = get(code.get(index + 1), paramModeArray[0]);
 				log.info("Outputting in opCode 4: " + retVal);
 				this.write(Long.toString(retVal));
 				this.setOutputSignal(retVal);
@@ -188,8 +207,11 @@ public class SensorBoostIntCode extends Thread {
 			case 5:
 				// Opcode 5 is jump-if-true: if the first parameter is non-zero, it sets the
 				// instruction pointer to the value from the second parameter.
-				if (determineParam(code.get(index + 1), paramModeArray[0]) != 0) {
-					index = (int) determineParam(code.get(index + 2), paramModeArray[1]);
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 1) + "], Modes: [" + paramModeArray[0] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 2) + "], Modes: [" + paramModeArray[1] + "]");
+
+				if (get(code.get(index + 1), paramModeArray[0]) != 0) {
+					index = (int) get(code.get(index + 2), paramModeArray[1]);
 					log.debug("Updating index: " + index);
 
 				} else {
@@ -201,8 +223,11 @@ public class SensorBoostIntCode extends Thread {
 				// Opcode 6 is jump-if-false: if the first parameter is zero, it sets the
 				// instruction pointer to the value from the second parameter. Otherwise, it
 				// does nothing.
-				if (determineParam(code.get(index + 1), paramModeArray[0]) == 0) {
-					index = (int) determineParam(code.get(index + 2), paramModeArray[1]);
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 1) + "], Modes: [" + paramModeArray[0] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 2) + "], Modes: [" + paramModeArray[1] + "]");
+
+				if (get(code.get(index + 1), paramModeArray[0]) == 0) {
+					index = (int) get(code.get(index + 2), paramModeArray[1]);
 					log.debug("Updating index: " + index);
 
 				} else {
@@ -214,11 +239,14 @@ public class SensorBoostIntCode extends Thread {
 				// Opcode 7 is less than: if the first parameter is less than the second
 				// parameter, it stores 1 in the position given by the third parameter.
 				// Otherwise, it stores 0.
-				if (determineParam(code.get(index + 1), paramModeArray[0]) < determineParam(code.get(index + 2),
-						paramModeArray[1])) {
-					code.put(code.get(index + 3).intValue(), new Long(1));
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 1) + "], Modes: [" + paramModeArray[0] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 2) + "], Modes: [" + paramModeArray[1] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 3) + "], Modes: [" + paramModeArray[2] + "]");
+
+				if (get(code.get(index + 1), paramModeArray[0]) < get(code.get(index +2), paramModeArray[1])) {
+					code.put(offSet + code.get(index + 3).intValue(), new Long(1));
 				} else {
-					code.put(code.get(index + 3).intValue(), new Long(0));
+					code.put(offSet + code.get(index + 3).intValue(), new Long(0));
 				}
 				index += 4;
 				break;
@@ -226,11 +254,14 @@ public class SensorBoostIntCode extends Thread {
 				// Opcode 8 is equals: if the first parameter is equal to the second parameter,
 				// it stores 1 in the position given by the third parameter. Otherwise, it
 				// stores 0.
-				if (determineParam(code.get(index + 1), paramModeArray[0]) == determineParam(code.get(index + 2),
-						paramModeArray[1])) {
-					code.put(code.get(index + 3).intValue(), new Long(1));
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 1) + "], Modes: [" + paramModeArray[0] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 2) + "], Modes: [" + paramModeArray[1] + "]");
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 3) + "], Modes: [" + paramModeArray[2] + "]");
+
+				if (get(code.get(index + 1), paramModeArray[0]) == get(code.get(index + 2), paramModeArray[1])) {
+					code.put(offSet + code.get(index + 3).intValue(), new Long(1));
 				} else {
-					code.put(code.get(index + 3).intValue(), new Long(0));
+					code.put(offSet + code.get(index + 3).intValue(), new Long(0));
 				}
 				index += 4;
 				break;
@@ -238,12 +269,18 @@ public class SensorBoostIntCode extends Thread {
 				// Opcode 9 adjusts the relative base by the value of its only parameter. The
 				// relative base increases (or decreases, if the value is negative) by the value
 				// of the parameter.
-				relativeBase += determineParam(code.get(index + 1), paramModeArray[0]);
-				log.debug("Relative base: " + relativeBase);
+				log.debug("Processing OpCode[" + opCode + "]: Parameters[" + code.get(index + 1) + "], Modes: [" + paramModeArray[0] + "]");
+				relativeBase += get(code.get(index + 1), paramModeArray[0]);
+				log.debug("Updating Relative base: " + relativeBase);
 				index += 2;
 				break;
+			default:
+				//error scenario, bad opcode
+				log.error("Bad opCode[" + opCode + "].");
+				System.exit(8);
 			}
-
+			//makes it easier to debug
+			log.debug("*****************************************");
 		}
 	}
 
@@ -255,19 +292,21 @@ public class SensorBoostIntCode extends Thread {
 	 * @param mode
 	 * @return
 	 */
-	private long determineParam(long t, long m) {
+	private long get(long t, int mode) {
 		int target = new Long(t).intValue();
-		int mode = new Long(m).intValue();
+		long returnVal = -1;
 		log.debug("Parameter -- Target: " + target + " Mode: " + mode);
 		if (mode == 0) { // position mode
-			return code.get(target);
+			 returnVal = code.get(target);
 		} else if (mode == 1) { // immediate mode
-			return t; //t is the long value for target
+			returnVal = t; //t is the long value for target
 		} else if (mode == 2) { // relative mode
-			return code.get((int)relativeBase + target);
-		} else {
-			return -1;
+			int newIndex = (int)relativeBase + target;
+			log.debug("Getting from index: " + newIndex);
+			returnVal =  code.get(newIndex);
 		}
+		log.debug("Return Val: " + returnVal );
+		return returnVal;
 	}
 
 	/**
