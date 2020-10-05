@@ -141,7 +141,6 @@ public class IntCodeComputer extends Thread {
 			switch ((int) opCode) {
 			case 99:
 				calculating = false;
-				log.info("Output of position 0: " + code.get(0));
 				log.info("Output: " + this.getOutputSignal());
 				log.debug("Number of opCode instructions processed: " + opCodeCounter);
 				this.shutdown();
