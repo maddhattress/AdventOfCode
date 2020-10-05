@@ -65,11 +65,11 @@ public class SensorBoostIntCode extends Thread {
 				//read string input, assumption is that its all on one line
 				final long[] c = ArrayUtils.addAll(new long[0],	Arrays.stream(line.split(","))
 						.mapToLong(Long::parseLong).toArray());
+				//put input into custom HashMap with "position/index" as the key
 				code = IntStream.range(0, c.length)
 						.boxed()
 						.collect(Collectors.toMap(Function.identity(), k->c[k], (a,b)->a,() -> new IntCodeProgram<Integer,Long>(0L)));
 			}
-
 		} catch (IOException ioe) {
 			log.error("IOException while reading program instruction file.", ioe);
 		} finally {
@@ -132,6 +132,7 @@ public class SensorBoostIntCode extends Thread {
 			switch ((int) opCode) {
 			case 99:
 				calculating = false;
+				log.info("Output of position 0: " + code.get(0));
 				log.info("Output: " + this.getOutputSignal());
 				log.debug("Number of opCode instructions processed: " + opCodeCounter);
 				this.shutdown();
@@ -247,29 +248,6 @@ public class SensorBoostIntCode extends Thread {
 	}
 
 	/**
-	 * helper method to determine if args were sent in or if they should be
-	 * retrieved from user
-	 * 
-	 * @param inputs
-	 * @return
-	 */
-	private synchronized long getInput() {
-		log.debug("Looking for input.");
-		if (ArrayUtils.isNotEmpty(inputs)) {
-			// if not empty, pop off next value in array
-			long input = Long.parseLong(inputs[0]);
-			inputs = (String[]) ArrayUtils.remove(inputs, 0);
-			return input;
-		} else if (in == null) {
-			// if empty args and in is not set, get from user
-			return Long.parseLong(SensorBoostIntCode.getUserInput());
-		}
-		// if none of the above, read from piped input
-		return getPipedInput();
-
-	}
-
-	/**
 	 * given a target and mode define how the param should be used position mode vs
 	 * immediate mode
 	 * 
@@ -290,6 +268,29 @@ public class SensorBoostIntCode extends Thread {
 		} else {
 			return -1;
 		}
+	}
+
+	/**
+	 * helper method to determine if args were sent in or if they should be
+	 * retrieved from user
+	 * 
+	 * @param inputs
+	 * @return
+	 */
+	private synchronized long getInput() {
+		log.debug("Looking for input.");
+		if (ArrayUtils.isNotEmpty(inputs)) {
+			// if not empty, pop off next value in array
+			long input = Long.parseLong(inputs[0]);
+			inputs = (String[]) ArrayUtils.remove(inputs, 0);
+			return input;
+		} else if (in == null) {
+			// if empty args and in is not set, get from user
+			return Long.parseLong(SensorBoostIntCode.getUserInput());
+		}
+		// if none of the above, read from piped input
+		return getPipedInput();
+
 	}
 
 
