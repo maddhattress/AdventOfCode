@@ -17,8 +17,8 @@ import org.apache.logging.log4j.Logger;
  */
 public class AmplificationCircuit {
 	private static final Logger log = LogManager.getLogger();
-	private static final String INPUT = "2019/input/day7.txt";
-	//private static final String INPUT = "input/day7.sample.txt";
+	private static final String INPUT = "input/2019/day7.txt";
+	//private static final String INPUT = "input/2019/day7.sample.txt";
 	
 	/** List of all the possible phase settings **/
 	private static final List<String> PHASE_SETTINGS = Arrays.asList(new String[] { "0", "1", "2", "3", "4" });

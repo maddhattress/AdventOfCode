@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class SpaceImageFormat {
 	private static final Logger log = LogManager.getLogger();
-	private static final String INPUT = "2019/input/day8.txt";
+	private static final String INPUT = "input/2019/day8.txt";
 	
 	/**
 	 * main processing unit

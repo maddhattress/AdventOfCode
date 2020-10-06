@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 public class FuelAggregator {
 	
 	private static final Logger log = LogManager.getLogger();
-	private static final String INPUT = "2019/input/day1.txt"; 
+	private static final String INPUT = "input/2019/day1.txt"; 
 	private int individualFuel = 0; 
 
 	/**

@@ -20,7 +20,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class SecureContainer {
 	private static final Logger log = LogManager.getLogger();
-	private static final String INPUT = "2019/input/day4.txt";
+	private static final String INPUT = "input/2019/day4.txt";
 	
 	private int MIN;
 	private int MAX; 

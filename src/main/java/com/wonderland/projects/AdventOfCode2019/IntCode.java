@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 public class IntCode extends Thread {
 
 	private static final Logger log = LogManager.getLogger();
-	private static final String INPUT = "2019/input/day5.txt"; 
+	private static final String INPUT = "input/2019/day5.txt"; 
 	
 	/** used to store program instruction/code **/
 	private int[] code;
