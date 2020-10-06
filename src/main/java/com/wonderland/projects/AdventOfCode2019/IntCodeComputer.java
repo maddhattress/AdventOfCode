@@ -26,7 +26,7 @@ import org.apache.logging.log4j.Logger;
 public class IntCodeComputer extends Thread {
 
 	private static final Logger log = LogManager.getLogger();
-	private static final String INPUT = "input/day9.txt";
+	private static final String INPUT = "2019/input/day9.txt";
 	//private static final String INPUT = "input/day9.sample.txt";
 
 	/** used to store program instruction/code **/

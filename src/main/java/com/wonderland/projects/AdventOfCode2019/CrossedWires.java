@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class CrossedWires {
 	private static final Logger log = LogManager.getLogger();
-	private static final String INPUT = "input/day3.txt";
+	private static final String INPUT = "2019/input/day3.txt";
 
 	private static final int[] CENTRAL_POINT = { 0, 0 }; // [x,y]
 

@@ -26,7 +26,7 @@ public class AmplificationCircuit2 {
 	private static final List<String> PHASE_SETTINGS = Arrays.asList(new String[] { "5", "6", "7", "8", "9" });
 
 	// private static final String INPUT_PROGRAM = "input/day7Pt2.sample.txt";
-	private static final String INPUT_PROGRAM = "input/day7.txt";
+	private static final String INPUT_PROGRAM = "2019/input/day7.txt";
 
 	/**
 	 * main processing unit
