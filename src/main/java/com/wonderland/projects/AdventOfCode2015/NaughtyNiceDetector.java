@@ -140,10 +140,10 @@ public class NaughtyNiceDetector {
 	 */
 	private List<String> getInput() {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(INPUT)));
-		List<String> instructions = reader.lines().collect(Collectors.toList());
+		List<String> input = reader.lines().collect(Collectors.toList());
 
 		IOUtils.closeQuietly(reader);
-		return instructions;
+		return input;
 	}
 
 	public static void main(String[] args) {
