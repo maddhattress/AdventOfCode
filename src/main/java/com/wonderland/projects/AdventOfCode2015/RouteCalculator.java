@@ -2,6 +2,7 @@ package com.wonderland.projects.AdventOfCode2015;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.iterators.PermutationIterator;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ShortestRoute {
+public class RouteCalculator {
 	private static final Logger log = LogManager.getLogger();
 	private static final String INPUT = "input/2015/day9.txt";
 
@@ -47,7 +49,13 @@ public class ShortestRoute {
 				log.error("Unknown format for Route[" + route + "].");
 			}
 		}
+		//print map for debugging
 		this.printRouteMap();
+		//calculate all possibilities
+		Map<List<String>, Integer> calculatedRoutes = this.calculateAllRoutes();
+		log.info("Shortest Route: " +  Collections.min(calculatedRoutes.values()));
+		log.info("Longest Route: " +  Collections.max(calculatedRoutes.values()));
+
 	}
 
 	private void addToMap(String origin, String destination, int distance) {
@@ -57,6 +65,36 @@ public class ShortestRoute {
 		routeMap.get(origin).put(destination, distance);
 	}
 	
+	private Map<List<String>, Integer> calculateAllRoutes() {
+		log.info("Calculating Routes:");
+		//hacking shortest route because 'each location must be visited exactly once'
+		PermutationIterator<String> iter = new PermutationIterator<String>(routeMap.keySet());
+		Map<List<String>, Integer> calculatedRoutes = new HashMap<List<String>, Integer>();
+		while (iter.hasNext()) {
+			List<String> route = iter.next();
+			int distance = 0; 
+			String origin = null;
+			for(String destination : route) {
+				if(origin != null) {
+					int distanceBetween = routeMap.get(origin).get(destination);
+					log.debug("Distance between [" + origin + "] --> [" + destination + "] = " + distanceBetween);
+					distance += distanceBetween;
+					log.debug("Total distance so far: " + distance);
+				}
+				origin = destination;
+			}
+			//if not in route list. add
+			//TODO: fix bug with anymatch
+			if(!calculatedRoutes.keySet().contains(route)) {
+				log.debug("Adding Route[" + route.toString() + "] with distance [" + distance + "] to map.");
+				calculatedRoutes.put(route, distance);
+			}
+		}
+		log.debug("Total routes: " + calculatedRoutes.size());
+		return calculatedRoutes;
+	}
+	
+	@SuppressWarnings("unused")
 	private void printRouteMap() {
 		log.info("Printing Route Map:");
 		for(Entry<String, Map<String, Integer>> sourceRoutes : routeMap.entrySet()) {
@@ -79,7 +117,7 @@ public class ShortestRoute {
 	}
 
 	public static void main(String[] args) {
-		ShortestRoute sr = new ShortestRoute();
+		RouteCalculator sr = new RouteCalculator();
 		sr.run();
 	}
 
